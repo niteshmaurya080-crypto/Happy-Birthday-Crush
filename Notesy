@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notesy - Find & Share Notes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #4a90e2;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .category-btn {
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            color: #333333;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            user-select: none;
+        }
+
+        .category-btn.active {
+            background-color: #4a90e2;
+            color: #fff;
+        }
+
+        .category-btn:hover {
+            opacity: 0.9;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .note-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #4a90e2;
+            word-break: break-word;
+        }
+
+        .note-card p {
+            font-size: 0.9rem;
+            color: #666666;
+            flex-grow: 1;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+
+        .note-card a {
+            text-decoration: none;
+            background-color: #4a90e2;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            user-select: none;
+        }
+
+        .card {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        textarea.input {
+            resize: vertical;
+        }
+
+        .button {
+            background-color: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+            user-select: none;
+        }
+
+        .button:hover {
+            background-color: #357ABD;
+        }
+
+        .donation-section {
+            text-align: center;
+        }
+
+        .donation-section p {
+            margin-bottom: 20px;
+            color: #666666;
+            font-size: 1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .donation-form {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .donation-form .input {
+            max-width: 180px;
+        }
+
+        .donation-form .input:last-of-type {
+            max-width: 120px;
+        }
+
+        .donation-message {
+            margin-top: 20px;
+            font-style: italic;
+            color: #4a90e2;
+            font-weight: 600;
+            min-height: 24px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #666666;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            user-select: none;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        .text-secondary {
+            color: #666666;
+        }
+
+        .no-notes {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>Find & Share Notes for Every Class and Exam.</h1>
+        </header>
+
+        <!-- Course Categories -->
+        <section>
+            <h2>Course Categories</h2>
+            <div class="categories-grid" id="categoriesGrid"></div>
+        </section>
+
+        <!-- Notes List -->
+        <section>
+            <h2 id="notesTitle">Select a category to view notes</h2>
+            <p id="noNotesMessage" class="text-secondary no-notes" style="display: none;">
+                No notes uploaded yet for this category.
+            </p>
+            <div class="notes-grid" id="notesGrid"></div>
+        </section>
+
+        <!-- Upload Notes Section -->
+        <section class="card">
+            <h2>Upload Notes</h2>
+            <form class="form" id="uploadForm">
+                <input type="text" class="input" id="fileName" placeholder="Name of File" required>
+                <select class="input" id="category" required>
+                    <option value="" disabled selected>Select Course Category</option>
+                </select>
+                <textarea class="input" id="description" placeholder="Short Description" rows="3" required></textarea>
+                <input type="file" class="input" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="padding: 6px 10px;" required>
+                <button type="submit" class="button">Upload</button>
+            </form>
+        </section>
+
+        <!-- Donation Section -->
+        <section class="card donation-section">
+            <h2>Support Notesy</h2>
+            <p>
+                This website is completely free for students, but running it has costs.
+                As a student, I cannot afford these expenses alone. If you find this helpful,
+                please support me with a small donation.
+            </p>
+            <form class="donation-form" id="donationForm">
+                <input type="text" class="input" id="donationName" placeholder="Your Name" required>
+                <input type="number" class="input" id="donationAmount" placeholder="Amount (₹)" min="1" required>
+                <button type="submit" class="button">Donate</button>
+            </form>
+            <p class="donation-message" id="donationMessage"></p>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>This website is made by students, for students.</p>
+            <p>&copy; <span id="currentYear"></span> Notesy</p>
+        </footer>
+    </div>
+
+    <script>
+        const COURSE_CATEGORIES = [
+            "Class 1–10",
+            "Class 11",
+            "Class 12",
+            "IIT JEE",
+            "JEE Mains",
+            "JEE Advanced",
+            "NEET",
+            "Other",
+        ];
+
+        const SAMPLE_DONATIONS = [
+            { name: "Bittu", amount: 10 },
+            { name: "Anjali", amount: 20 },
+            { name: "Rahul", amount: 50 },
+            { name: "Sneha", amount: 15 },
+            { name: "Amit", amount: 5 },
+            { name: "Priya", amount: 30 },
+        ];
+
+        let notes = [];
+        let selectedCategory = "";
+
+        // Initialize
+        function init() {
+            loadNotes();
+            renderCategories();
+            renderCategorySelect();
+            shuffleDonationMessage();
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            // Event listeners
+            document.getElementById('uploadForm').addEventListener('submit', handleUploadSubmit);
+            document.getElementById('donationForm').addEventListener('submit', handleDonate);
+        }
+
+        // Load notes from memory
+        function loadNotes() {
+            notes = [];
+        }
+
+        // Save notes to memory
+        function saveNotes() {
+            // Notes are stored in memory (array)
+        }
+
+        // Render categories
+        function renderCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = '';
+            
+            COURSE_CATEGORIES.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.textContent = cat;
+                btn.setAttribute('aria-pressed', 'false');
+                
+                btn.addEventListener('click', () => {
+                    if (selectedCategory === cat) {
+                        selectedCategory = "";
+                    } else {
+                        selectedCategory = cat;
+                    }
+                    updateCategoryButtons();
+                    renderNotes();
+                });
+                
+                grid.appendChild(btn);
+            });
+        }
+
+        // Update category button states
+        function updateCategoryButtons() {
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach((btn, index) => {
+                if (COURSE_CATEGORIES[index] === selectedCategory) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-pressed', 'true');
+                } else {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-pressed', 'false');
+                }
+            });
+        }
+
+        // Render category select dropdown
+        function renderCategorySelect() {
+            const select = document.getElementById('category');
+            COURSE_CATEGORIES.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                select.appendChild(option);
+            });
+        }
+
+        // Render notes
+        function renderNotes() {
+            const grid = document.getElementById('notesGrid');
+            const title = document.getElementById('notesTitle');
+            const noNotesMsg = document.getElementById('noNotesMessage');
+            
+            if (!selectedCategory) {
+                title.textContent = "Select a category to view notes";
+                grid.innerHTML = '';
+                noNotesMsg.style.display = 'none';
+                return;
+            }
+            
+            const filteredNotes = notes.filter(note => note.category === selectedCategory);
+            title.textContent = `Notes for ${selectedCategory}`;
+            
+            if (filteredNotes.length === 0) {
+                grid.innerHTML = '';
+                noNotesMsg.style.display = 'block';
+                return;
+            }
+            
+            noNotesMsg.style.display = 'none';
+            grid.innerHTML = '';
+            
+            filteredNotes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = 'note-card';
+                
+                card.innerHTML = `
+                    <h3 title="${note.fileName}">${note.fileName}</h3>
+                    <p title="${note.description}">${note.description}</p>
+                    <a href="${note.url}" target="_blank" rel="noopener noreferrer">View / Download</a>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Handle upload submit
+        function handleUploadSubmit(e) {
+            e.preventDefault();
+            
+            const fileName = document.getElementById('fileName').value.trim();
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!fileName || !category || !description || !file) {
+                alert("Please fill all fields and select a file.");
+                return;
+            }
+            
+            const fileURL = URL.createObjectURL(file);
+            
+            const newNote = {
+                id: Date.now(),
+                fileName: fileName,
+                category: category,
+                description: description,
+                url: fileURL
+            };
+            
+            notes.unshift(newNote);
+            saveNotes();
+            
+            // Reset form
+            document.getElementById('uploadForm').reset();
+            
+            // Update display if current category is selected
+            if (selectedCategory === category) {
+                renderNotes();
+            }
+            
+            alert("Note uploaded successfully!");
+        }
+
+        // Handle donation
+        function handleDonate(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('donationName').value.trim();
+            const amount = Number(document.getElementById('donationAmount').value);
+            
+            if (!name || !amount || amount <= 0) {
+                alert("Please enter a valid name and donation amount.");
+                return;
+            }
+            
+            SAMPLE_DONATIONS.push({ name: name, amount: amount });
+            
+            document.getElementById('donationForm').reset();
+            shuffleDonationMessage();
+            alert("Thank you for your donation!");
+        }
+
+        // Shuffle donation message
+        function shuffleDonationMessage() {
+            const randomIndex = Math.floor(Math.random() * SAMPLE_DONATIONS.length);
+            const donation = SAMPLE_DONATIONS[randomIndex];
+            document.getElementById('donationMessage').textContent = 
+                `${donation.name} donated ₹${donation.amount}`;
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
